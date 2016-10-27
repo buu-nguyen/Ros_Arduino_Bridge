@@ -7,8 +7,8 @@ IBT2MotorShield::IBT2MotorShield()
   //Pin map
   _FPWM1 = 5;
   _BPWM1 = 4;
-  _FPWM2 = 6;
-  _BPWM2 = 7;
+  _FPWM2 = 7;
+  _BPWM2 = 6;
 }
 
 IBT2MotorShield::IBT2MotorShield(unsigned char FPWM1, unsigned char BPWM1,

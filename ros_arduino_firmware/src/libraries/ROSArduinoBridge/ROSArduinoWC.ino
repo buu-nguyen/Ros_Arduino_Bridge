@@ -1,67 +1,10 @@
-/*********************************************************************
- *  ROSArduinoBridge
-
-    A set of simple serial commands to control a differential drive
-    robot and receive back sensor and odometry data. Default
-    configuration assumes use of an Arduino Mega + Pololu motor
-    controller shield + Robogaia Mega Encoder shield.  Edit the
-    readEncoder() and setMotorSpeed() wrapper functions if using
-    different motor controller or encoder method.
-
-    Created for the Pi Robot Project: http://www.pirobot.org
-    and the Home Brew Robotics Club (HBRC): http://hbrobotics.org
-
-    Authors: Patrick Goebel, James Nugen
-
-    Inspired and modeled after the ArbotiX driver by Michael Ferguson
-
-    Software License Agreement (BSD License)
-
-    Copyright (c) 2012, Patrick Goebel.
-    All rights reserved.
-
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
-
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above
-       copyright notice, this list of conditions and the following
-       disclaimer in the documentation and/or other materials provided
-       with the distribution.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-    FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-    COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-    BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-    LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- *  POSSIBILITY OF SUCH DAMAGE.
- *********************************************************************/
 
 #define USE_BASE      // Enable the base controller code
 //#undef USE_BASE     // Disable the base controller code
-
 /* Define the motor controller and encoder library you are using */
 #ifdef USE_BASE
    /* The IBT-2 motor driver shield */
    #define IBT2
-
-   /* The Pololu VNH5019 dual motor driver shield */
-   //#define POLOLU_VNH5019
-
-   /* The Pololu MC33926 dual motor driver shield */
-   //#define POLOLU_MC33926
-
-   /* The RoboGaia encoder shield */
-   //#define ROBOGAIA
-
    /* Encoders directly attached to Arduino board */
    #define ARDUINO_ENC_COUNTER
 #endif
@@ -114,13 +57,13 @@
 
   /* Stop the robot if it hasn't received a movement command
    in this number of milliseconds */
-  #define AUTO_STOP_INTERVAL 2000
+  #define AUTO_STOP_INTERVAL 5000
   long lastMotorCommand = AUTO_STOP_INTERVAL;
 #endif
 
 /* Variable initialization */
 
-// A pair of varibles to help parse serial commands (thanks Fergs)
+// A pair of varibles to help parse serial commands
 int arg = 0;
 int index = 0;
 
@@ -183,7 +126,7 @@ int runCommand() {
     Serial.println("OK");
     break;
   case PING:
-    Serial.println(Ping(arg1, arg2));
+    Serial.println(Ping(arg1));
     break;
 #ifdef USE_SERVOS
   case SERVO_WRITE:
@@ -204,7 +147,7 @@ int runCommand() {
    case RESET_ENCODERS:
     resetEncoders();
     resetPID();
-    Serial.println("OK");
+    Serial.println("OK, RESET");
     break;
   case MOTOR_SPEEDS:
     /* Reset the auto stop timer */
@@ -216,7 +159,7 @@ int runCommand() {
     else moving = 1;
     leftPID.TargetTicksPerFrame = arg1;
     rightPID.TargetTicksPerFrame = arg2;
-    Serial.println("OK");
+    Serial.println("OK, RUN");
     break;
   case UPDATE_PID:
     while ((str = strtok_r(p, ":", &p)) != '\0') {
@@ -227,7 +170,7 @@ int runCommand() {
     Kd = pid_args[1];
     Ki = pid_args[2];
     Ko = pid_args[3];
-    Serial.println("OK");
+    Serial.println("OK, UPDATE");
     break;
 #endif
   default:

@@ -8,7 +8,7 @@ float microsecondsToCm(long microseconds)
   return microseconds / 29 / 2;
 }
 
-long Ping(int pin, int echopin) {
+long Ping(int pin) {
   long duration, range;
 
   // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
@@ -23,8 +23,8 @@ long Ping(int pin, int echopin) {
   // The same pin is used to read the signal from the PING))): a HIGH
   // pulse whose duration is the time (in microseconds) from the sending
   // of the ping to the reception of its echo off of an object.
-  pinMode(echopin, INPUT);
-  duration = pulseIn(echopin, HIGH);
+  pinMode(pin, INPUT);
+  duration = pulseIn(pin, HIGH);
 
   // convert the time into meters
   range = microsecondsToCm(duration);
