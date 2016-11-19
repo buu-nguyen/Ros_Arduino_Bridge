@@ -125,6 +125,6 @@ void updatePID() {
   doPID(&leftPID);
 
   /* Set the motor speeds accordingly */
-  setMotorSpeeds(leftPID.output, rightPID.output);
+  setMotorSpeeds(rightPID.output, leftPID.output);
 }
 
