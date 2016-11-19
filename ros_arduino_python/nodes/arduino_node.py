@@ -31,6 +31,9 @@ import thread
 class ArduinoROS():
     def __init__(self):
         rospy.init_node('Arduino', log_level=rospy.DEBUG)
+
+         # Get the actual node name in case it is set in the launch file
+        self.name = rospy.get_name()
                 
         # Cleanup when termniating the node
         rospy.on_shutdown(self.shutdown)
@@ -59,11 +62,11 @@ class ArduinoROS():
         self.cmd_vel = Twist()
   
         # A cmd_vel publisher so we can stop the robot when shutting down
-        self.cmd_vel_pub = rospy.Publisher('cmd_vel', Twist)
+        self.cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=5)
         
         # The SensorState publisher periodically publishes the values of all sensors on
         # a single topic.
-        self.sensorStatePub = rospy.Publisher('~sensor_state', SensorState)
+        self.sensorStatePub = rospy.Publisher('~sensor_state', SensorState, queue_size=5)
         
         # A service to position a PWM servo
         rospy.Service('~servo_write', ServoWrite, self.ServoWriteHandler)
@@ -104,30 +107,35 @@ class ArduinoROS():
                 params['direction'] = 'input'
                 
             if params['type'] == "Ping":
-                sensor = Ping(self.controller, name, params['pin'], params['echopin'], params['rate'], self.base_frame)
+                sensor = Ping(self.controller, name, params['pin'], params['echopin'], params['rate'],  params['frame_id'])
+            elif params['type'] == "PointCloudPing":
+                sensor = PointCloudPing(self.controller, name, params['pin'], params['echopin'],params['rate'], params['frame_id'])
             elif params['type'] == "GP2D12":
-                sensor = GP2D12(self.controller, name, params['pin'], params['rate'], self.base_frame)
+                sensor = GP2D12(self.controller, name, params['pin'], params['rate'])
             elif params['type'] == 'Digital':
                 sensor = DigitalSensor(self.controller, name, params['pin'], params['rate'], self.base_frame, direction=params['direction'])
             elif params['type'] == 'Analog':
                 sensor = AnalogSensor(self.controller, name, params['pin'], params['rate'], self.base_frame, direction=params['direction'])
             elif params['type'] == 'PololuMotorCurrent':
-                sensor = PololuMotorCurrent(self.controller, name, params['pin'], params['rate'], self.base_frame)
+                sensor = PololuMotorCurrent(self.controller, name, params['pin'], params['rate'] )
             elif params['type'] == 'PhidgetsVoltage':
-                sensor = PhidgetsVoltage(self.controller, name, params['pin'], params['rate'], self.base_frame)
+                sensor = PhidgetsVoltage(self.controller, name, params['pin'], params['rate'])
             elif params['type'] == 'PhidgetsCurrent':
-                sensor = PhidgetsCurrent(self.controller, name, params['pin'], params['rate'], self.base_frame)
+                sensor = PhidgetsCurrent(self.controller, name, params['pin'], params['rate'])
                 
 #                if params['type'] == "MaxEZ1":
 #                    self.sensors[len(self.sensors)]['trigger_pin'] = params['trigger_pin']
 #                    self.sensors[len(self.sensors)]['output_pin'] = params['output_pin']
 
-            self.mySensors.append(sensor)
-            rospy.loginfo(name + " " + str(params))
+            try:
+                self.mySensors.append(sensor)
+                rospy.loginfo(name + " " + str(params) + " published on topic " + rospy.get_name() + "/sensor/" + name)
+            except:
+                rospy.logerr("Sensor type " + str(params['type']) + " not recognized.")
               
         # Initialize the base controller if used
         if self.use_base_controller:
-            self.myBaseController = BaseController(self.controller, self.base_frame)
+            self.myBaseController = BaseController(self.controller, self.base_frame, self.name + "_base_controller")
     
         # Start polling the sensors and base controller
         while not rospy.is_shutdown():
@@ -146,7 +154,7 @@ class ArduinoROS():
             
             if now > self.t_next_sensors:
                 msg = SensorState()
-                msg.header.frame_id = self.base_frame
+                msg.header.frame_id = 'sensor_base'
                 msg.header.stamp = now
                 for i in range(len(self.mySensors)):
                     msg.name.append(self.mySensors[i].name)

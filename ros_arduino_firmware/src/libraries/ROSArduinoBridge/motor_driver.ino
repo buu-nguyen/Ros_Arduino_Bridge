@@ -27,7 +27,7 @@
   }
 
   // A convenience function for setting both motor speeds
-  void setMotorSpeeds(int leftSpeed, int rightSpeed) {
+  void setMotorSpeeds(int rightSpeed, int leftSpeed) {
     setMotorSpeed(LEFT, leftSpeed);
     setMotorSpeed(RIGHT, rightSpeed);
   }

@@ -66,11 +66,11 @@ void IBT2MotorShield::setM1Speed(int speed)
   else if (reverse)
   {
     analogWrite(_FPWM1,0);
-    analogWrite(_BPWM1,speed * 51 / 80);
+    analogWrite(_BPWM1,(speed*80/51));
   }
   else
   {
-    analogWrite(_FPWM1,speed * 51 / 80);
+    analogWrite(_FPWM1,(speed*80/51));
     analogWrite(_BPWM1,0);
   }
 }
@@ -96,11 +96,11 @@ void IBT2MotorShield::setM2Speed(int speed)
   else if (reverse)
   {
     analogWrite(_FPWM2,0);
-    analogWrite(_BPWM2,speed * 51 / 80);
+    analogWrite(_BPWM2,(speed*80/51));
   }
   else
   {
-    analogWrite(_FPWM2,speed * 51 / 80);
+    analogWrite(_FPWM2,(speed*80/51));
     analogWrite(_BPWM2,0);
   }
 }
